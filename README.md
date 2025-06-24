@@ -20,7 +20,7 @@ Instead we will have a single pointer pointing to an array of size 'rows X cols'
 	};
 ```
 
-This will give us:<br>
+This will give us:
 > -->Better memory locality and perfromance<br>
 > -->Reduction overhead of allocating mutliple pointers<br>
 > -->Simpler memory management<br>
