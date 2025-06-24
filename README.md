@@ -1,6 +1,6 @@
 # CNet-v2
 <b>The second (and hopefully better) version of a library made purely in C for creating and training Artificial Neural Networks.<br>
-I will be updating this readme file with necessary explanations and some small snippets of theory whenever necessary.<b><br><br>
+I will be updating this readme file with necessary explanations and some small snippets of theory whenever necessary.</b><br><br>
 Feedbacks and suggestions are highly appreciated :) <br>
 
 <hr>
@@ -15,7 +15,7 @@ Instead we will have a single pointer pointing to an array of size 'rows X cols'
 		int row, col;
 		float *data;
 	};
-<b>
+</b>
 
 This will give us:<br>
 <p style="margin-left: 10px">-->Better memory locality and perfromance</p>
