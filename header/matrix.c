@@ -1,0 +1,138 @@
+#include"CNet.h"
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>
+
+struct Matrix* create_matrix(int row, int col){
+	struct Matrix* matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
+	matrix->row = row;
+	matrix->col = col;
+	matrix->data = (float*)malloc(row*col*sizeof(float));
+	if(matrix->data==NULL){
+		printf("Allocation failed\n");
+		return NULL;
+	}
+
+	return matrix;
+}
+
+struct Matrix* copy_matrix(const struct Matrix* matrix){
+	if(matrix==NULL) return NULL;
+
+	int row = matrix->row;
+	int col = matrix->col; 
+
+	struct Matrix* new_matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
+	new_matrix->row = row;
+	new_matrix->col = col;
+	new_matrix->data = (float*)malloc(row*col*sizeof(float));
+
+	if(new_matrix->data==NULL) return NULL
+	
+	memcpy(new_matrix->data, matrix->data, row*col*sizeof(int));
+	return new_matrix;
+}
+
+
+void init_matrix(struct Matrix* matrix){
+	if(matrix==NULL) return;
+
+	float limit = sqrtf(6.0f/(matrix->row + matrix->col));
+
+	int n = matrix->row * matrix->col;
+	for(int i=0;i<n;i++){
+		float num = (float)rand()/RAND_MAX;
+		matrix->data[i] = limit*(2.0f*num - 1.0f);
+	}
+	return;
+}
+
+void fill_matrix(struct Matrix* matrix, float value){
+	if(matrix==NULL) return;
+
+	int n = matrix->row * matrix->col;
+	for(int i=0;i<n;i++){
+		matrix->data[i] = value;
+	}
+	return;
+}
+
+void delete_matrix(struct Matrix* matrix){
+	if(matrix==NULL) return;
+	free(matrix->data);
+	free(matrix);
+	return;
+}
+
+void print_martix(const struct Matrix* matrix){
+	if(matrix==NULL) return;
+
+	int row = matrix->row;
+	int col = matrix->col;
+	printf("Rows: %d\n", row);
+	printf("Columns: %d\n", col);
+
+	for(int r=0;r<row;r++){
+		for(int c=0;c<col;c++){
+			printf("%.2f ", matrix->data[r*col+c]);
+		}
+		printf("\n");
+	}
+	return;
+}
+
+void add_matrix(struct Matrix* m1, const struct Matrix* m2){
+	if(m1==NULL || m2==NULL) return;
+
+	if(m1->row!=m2->row || m1->col!=m2->col){
+		printf("Dimension Mismatch - addition not possible\n");
+		return;
+	}
+
+	int n = m1->row*m1->col;
+	for(int i=0;i<n;i++){
+		m1->data[i] += m2->data[i];
+	}
+}
+
+void subt_matrix(struct Matrix *m1, const struct Matrix *m2){
+	if(m1==NULL || m2==NULL) return;
+
+	if(m1->row!=m2->row || m1->col!=m2->col){
+		printf("Dimension Mismatch - subtraction not possible\n");
+		return;
+	}
+
+	int n = m1->row*m1->col;
+	for(int i=0;i<n;i++){
+		m1->data[i] -= m2->data[i];
+	}
+}
+
+void pointwise_product(struct Matrix *m1, const struct Matrix *m2){
+	if(m1==NULL || m2==NULL) return;
+
+	if(m1->row!=m2->row || m1->col!=m2->col){
+		printf("Dimension Mismatch - pointwise multiplication not possible\n");
+		return;
+	}
+
+	int n = m1->row*m1->col;
+	for(int i=0;i<n;i++){
+		m1->data[i] *= m2->data[i];
+	}
+}
+
+void scale_matrix(struct Matrix *matrix, float scale){
+	if(matrix==NULL) return;
+
+	int n = matrix->row*matrix->col;
+	for(int i=0;i<n;i++){
+		matrix->data[i] *= scale;
+	}
+	return;
+}
+
+void dot_product(struct Matrix *m1, const Matrix *m2);
+void transpose_matrix(struct Matrix *matrix);

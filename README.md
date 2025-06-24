@@ -8,7 +8,7 @@ Feedbacks and suggestions are highly appreciated :) <br>
 
 <hr>
 
-<h1>Matrix Structure</h1>
+<h2>Matrix Structure</h2>
 Most of our numerical data will be stored in matrices (2D arrays)<br>
 We will use heap-allcoated arrays, but not in a pointer-to-pointer manner.<br>
 Instead we will have a single pointer pointing to an array of size 'rows X cols'.
