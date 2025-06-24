@@ -12,12 +12,14 @@ Feedbacks and suggestions are highly appreciated :) <br>
 Most of our numerical data will be stored in matrices (2D arrays)<br>
 We will use heap-allcoated arrays, but not in a pointer-to-pointer manner.<br>
 Instead we will have a single pointer pointing to an array of size 'rows X cols'.
-```
+
+<pre>```
 	struct Matrix{
 		int row, col;
 		float *data;
 	};
-```
+```<pre>
+
 This will give us:<br>
 > -->Better memory locality and perfromance<br>
 > -->Reduction overhead of allocating mutliple pointers<br>
