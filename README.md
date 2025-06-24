@@ -5,7 +5,7 @@ Feedbacks and suggestions are highly appreciated :) <br>
 
 <hr>
 
-<h1>Matrix Structure<h1>
+<h1>Matrix Structure</h1>
 Most of our numerical data will be stored in matrices (2D arrays)<br>
 We will use heap-allcoated arrays, but not in a pointer-to-pointer manner.<br>
 Instead we will have a single pointer pointing to an array of size 'rows X cols'.<br>
@@ -16,7 +16,7 @@ Instead we will have a single pointer pointing to an array of size 'rows X cols'
 		float *data;
 	};
 <b>
-	
+
 This will give us:<br>
 <p style="margin-left: 10px">-->Better memory locality and perfromance</p>
 <p style="margin-left: 10px">-->Reduction overhead of allocating mutliple pointers</p>
