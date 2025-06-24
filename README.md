@@ -4,7 +4,7 @@ The second (and hopefully better) version of a library made purely in C for crea
 I will be updating this readme file with necessary explanations and some small snippets of theory whenever necessary.
 </b>
 <br><br>
-Feedbacks and suggestions are highly appreciated :) <br>
+Feedbacks and suggestions [Discussions] are highly appreciated :) <br>
 
 <hr>
 
