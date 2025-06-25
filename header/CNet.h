@@ -45,10 +45,10 @@ void print_martix(const struct Matrix* matrix);
 
 void add_matrix(struct Matrix* m1, const struct Matrix* m2);
 void subt_matrix(struct Matrix *m1, const struct Matrix *m2);
-void dot_product(struct Matrix *m1, const struct Matrix *m2);
 void pointwise_product(struct Matrix *m1, const struct Matrix *m2);
-void transpose_matrix(struct Matrix *matrix);
 void scale_matrix(struct Matrix *matrix, float scale);
+struct Matrix* multiply_matrix(const struct Matrix *m1, const struct Matrix *m2);
+struct Matrix* transpose_matrix(const struct Matrix *matrix);
 
 
 #endif

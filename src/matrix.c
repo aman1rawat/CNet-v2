@@ -70,7 +70,7 @@ void print_martix(const struct Matrix* matrix){
 
 	int row = matrix->row;
 	int col = matrix->col;
-	printf("Rows: %d\n", row);
+	printf("row: %d\n", row);
 	printf("Columns: %d\n", col);
 
 	for(int r=0;r<row;r++){
@@ -134,5 +134,45 @@ void scale_matrix(struct Matrix *matrix, float scale){
 	return;
 }
 
-void dot_product(struct Matrix *m1, const Matrix *m2);
-void transpose_matrix(struct Matrix *matrix);
+struct Matrix* multiply_matrix(const struct Matrix *m1, const Matrix *m2){
+	if(m1->col!=m2->row){
+		printf("Dimension Mismatch: matrix multiplication not possible\n");
+		return NULL;
+	}
+
+	int row = m1->row;
+	int col = m2->col;
+
+	struct Matrix* matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
+    matrix->row = row;
+    matrix->col = col;
+    matrix->data = (float*)calloc(matrix->row * matrix->col, sizeof(float));
+
+
+    for(int i=0;i<row;i++){
+        for(int j=0;j<col;j++){
+            float sum = 0.0f;
+            for(int k=0;k<m1->col;k++){
+                sum += m1->data[i*m1->col + k] * m2->data[k*m2->col + j];
+            }
+            matrix->data[i*matrix->col + j] = sum;
+        }
+    }
+
+    return matrix;
+}
+
+struct Matrix* transpose_matrix(const struct Matrix *matrix){
+	struct Matrix* t_matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
+    t_matrix->row = matrix->col;
+    t_matrix->col = matrix->row;
+    t_matrix->data = (float*)malloc(t_matrix->row * t_matrix->col * sizeof(float));
+
+    for(int i=0;i<matrix->row;i++){
+        for(int j=0;j<matrix->col;j++){
+            t_matrix->data[j*t_matrix->col + i] = matrix->data[i*matrix->col + j];
+        }
+    }
+
+    return t_matrix;
+}
