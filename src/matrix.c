@@ -1,16 +1,26 @@
-#include"CNet.h"
+#include"../include/CNet.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
+#include<time.h>
 
 struct Matrix* create_matrix(int row, int col){
+	if(row==0 || col==0){
+		printf("Invalid Dimensions (%d X %d) : matrix creation not possible\n", row, col);
+		return NULL;
+	}
 	struct Matrix* matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
+	if(matrix==NULL){
+		printf("Allocation failed\n");
+		return NULL;
+	}
 	matrix->row = row;
 	matrix->col = col;
 	matrix->data = (float*)malloc(row*col*sizeof(float));
 	if(matrix->data==NULL){
 		printf("Allocation failed\n");
+		free(matrix);
 		return NULL;
 	}
 
@@ -28,7 +38,7 @@ struct Matrix* copy_matrix(const struct Matrix* matrix){
 	new_matrix->col = col;
 	new_matrix->data = (float*)malloc(row*col*sizeof(float));
 
-	if(new_matrix->data==NULL) return NULL
+	if(new_matrix->data==NULL) return NULL;
 	
 	memcpy(new_matrix->data, matrix->data, row*col*sizeof(int));
 	return new_matrix;
@@ -37,6 +47,7 @@ struct Matrix* copy_matrix(const struct Matrix* matrix){
 
 void init_matrix(struct Matrix* matrix){
 	if(matrix==NULL) return;
+	srand(time(NULL));
 
 	float limit = sqrtf(6.0f/(matrix->row + matrix->col));
 
@@ -65,20 +76,23 @@ void delete_matrix(struct Matrix* matrix){
 	return;
 }
 
-void print_martix(const struct Matrix* matrix){
+void print_matrix(const struct Matrix* matrix){
 	if(matrix==NULL) return;
 
 	int row = matrix->row;
 	int col = matrix->col;
-	printf("row: %d\n", row);
-	printf("Columns: %d\n", col);
+	printf(" Row: %d\n", row);
+	printf(" Col: %d\n", col);
 
-	for(int r=0;r<row;r++){
-		for(int c=0;c<col;c++){
-			printf("%.2f ", matrix->data[r*col+c]);
+	for(int i=0;i<row;i++){
+		for(int j=0;j<col;j++){
+			float n = matrix->data[i*col+j];
+			if(n<0) printf("%.2f ", n);
+			else printf(" %.2f ", n);
 		}
 		printf("\n");
 	}
+	printf("\n");
 	return;
 }
 
@@ -134,7 +148,7 @@ void scale_matrix(struct Matrix *matrix, float scale){
 	return;
 }
 
-struct Matrix* multiply_matrix(const struct Matrix *m1, const Matrix *m2){
+struct Matrix* multiply_matrix(const struct Matrix *m1, const struct Matrix *m2){
 	if(m1->col!=m2->row){
 		printf("Dimension Mismatch: matrix multiplication not possible\n");
 		return NULL;
