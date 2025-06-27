@@ -17,8 +17,8 @@ struct Layer{
 	struct Matrix* weighted_sum;
 	struct Matrix* activated_sum;
 	struct Matrix* error;
-	struct Layer *next_layer;
-	struct Layer *prev_layer;
+	struct Layer* next_layer;
+	struct Layer* prev_layer;
 	enum Activation activation;
 };
 
@@ -30,8 +30,9 @@ struct TrainingConfig{
 };
 
 struct Network{
-	struct Matrix*first_layer;
-	struct Matrix*last_layer;
+	int input_size;
+	struct Matrix* first_layer;
+	struct Matrix* last_layer;
 	float loss;
 	struct TrainingConfig config;
 };
@@ -50,5 +51,11 @@ void scale_matrix(struct Matrix *matrix, float scale);
 struct Matrix* multiply_matrix(const struct Matrix *m1, const struct Matrix *m2);
 struct Matrix* transpose_matrix(const struct Matrix *matrix);
 
+struct Network* create_network(int input_size);
+void delete_network(struct Network* network);
+
+void add_layer(struct Network *network, int size);
+void free_layer(struct Layer *layer);
+void remove_layer(struct Network *network);
 
 #endif
