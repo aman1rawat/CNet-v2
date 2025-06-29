@@ -1,5 +1,95 @@
 #include "../include/CNet.h"
 #include<stdlib.h>
+#include<stdio.h>
+
+void forward_prop(struct Network *network, struct Matrix *input){
+	if(network==NULL || network->first_layer==NULL) return;
+	
+	struct Layer *curr_layer = network->first_layer;
+	while(curr_layer!=NULL){
+		if(curr_layer==network->first_layer){
+			curr_layer->weighted_sum = multiply_matrix(input, curr_layer->weights);
+		}
+		else{
+			curr_layer->weighted_sum = multiply_matrix(curr_layer->prev_layer->activated_sum, curr_layer->weights);
+		}
+
+		add_matrix(curr_layer->weighted_sum, curr_layer->bias);
+
+		switch(curr_layer->activation){
+			case SIGMOID:
+				curr_layer->activated_sum = sigmoid(curr_layer->weighted_sum);
+				break;
+			case RELU:
+				curr_layer->activated_sum = relu(curr_layer->weighted_sum);
+				break;
+			default:
+				printf("Invalid Activation\n");
+				exit(1);
+				break;
+		}
+
+		curr_layer = curr_layer->next_layer;
+	}
+}
+
+void calculate_loss(struct Network *network, struct Matrix* output){
+	switch(network->config->loss_function){
+		case MSE:
+			network->loss_derivative = d_mse(network->last_layer->activated_sum, output);
+			break;
+	}
+	return;
+}
+ 
+void back_prop(struct Network *network){
+	struct Layer* curr_layer = network->last_layer;
+	while(curr_layer!=NULL){
+		switch(curr_layer->activation){
+			case SIGMOID:
+				curr_layer->error = d_sigmoid(curr_layer->weighted_sum);
+				break;
+			case RELU:
+				curr_layer->error = d_relu(curr_layer->weighted_sum);
+				break;
+			default:
+				printf("Invalid Activation\n");
+				exit(1);
+				break;
+		}
+
+		if(curr_layer==network->last_layer){
+			pointwise_product(curr_layer->error, network->loss_derivative);
+		}
+		else{
+			curr_layer->error = multiply_matrix(curr_layer->next_layer->error, curr_layer->next_layer->weights);
+			pointwise_product(curr_layer->error, curr_layer->weighted_sum);
+			delete_matrix(curr_layer->next_layer->error);
+			curr_layer->next_layer->error = NULL;
+		}
+
+		struct Matrix *weight_gradient = transpose_matrix(curr_layer->error);
+		multiply_matrix(weight_gradient, curr_layer->prev_layer->activated_sum);
+		scale_matrix(weight_gradient, network->lr);
+
+		struct Matrix *bias_gradient = copy_matrix(curr_layer->error);
+		scale_matrix(bias_gradient, network->lr);
+
+		subt_matrix(curr_layer->weights, weight_gradient);
+		subt_matrix(curr_layer->bias, bias_gradient);
+
+		if(curr_layer->next!=NULL){
+			delete_matrix(curr_layer->next_layer->weighted_sum);
+			curr_layer->next_layer->weighted_sum = NULL;
+			delete_matrix(curr_layer->next_layer->activated_sum);
+			curr_layer->next_layer->activated_sum = NULL;
+		}
+
+		delete_matrix(weight_gradient);
+		delete_matrix(bias_gradient);
+
+	}
+}
 
 struct Network* create_network(int input_size){
 	struct Network *network = (struct Network*)malloc(sizeof(struct Network));
@@ -32,7 +122,7 @@ void delete_network(struct Network *network){
 void add_layer(struct Network *network, int size, enum Activation activation){
 	if(network==NULL) return;
 
-	struct Layer *layer = (struct Layer*)malloc(sieof(struct Layer));
+	struct Layer *layer = (struct Layer*)malloc(sizeof(struct Layer));
 	layer->size = size;
 
 	if(network->first_layer==NULL){
@@ -42,7 +132,7 @@ void add_layer(struct Network *network, int size, enum Activation activation){
 		layer->weights = create_matrix(size, network->last_layer->size);
 	}
 
-	layer->bias = create_matrix(size, 1);
+	layer->bias = create_matrix(1, size);
 
 	init_matrix(layer->weights);
 	fill_matrix(layer->bias, 0.0f);
@@ -91,3 +181,4 @@ void remove_layer(struct Network* network){
 		return;
 	}
 }
+

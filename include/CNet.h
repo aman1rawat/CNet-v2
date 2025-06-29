@@ -2,7 +2,6 @@
 #define CNET_H
 
 enum Activation{SIGMOID, RELU};
-enum Optimizer{SGD};
 enum LossFunction{MSE};
 
 struct Matrix{
@@ -24,7 +23,6 @@ struct Layer{
 
 struct TrainingConfig{
 	float lr;
-	enum Optimizer optimizer;
 	enum LossFunction lossFunction;
 	int epochs;
 };
@@ -34,6 +32,7 @@ struct Network{
 	struct Matrix* first_layer;
 	struct Matrix* last_layer;
 	float loss;
+	struct Matrix* loss_derivative;
 	struct TrainingConfig config;
 };
 
@@ -53,9 +52,21 @@ struct Matrix* transpose_matrix(const struct Matrix *matrix);
 
 struct Network* create_network(int input_size);
 void delete_network(struct Network* network);
-
 void add_layer(struct Network *network, int size);
 void free_layer(struct Layer *layer);
 void remove_layer(struct Network *network);
+
+struct Matrix* sigmoid(const struct Matrix* matrix);
+struct Matrix* relu(const struct Matrix* matrix);
+struct Matrix* d_sigmoid(const struct Matrix* matrix);
+struct Matrix* d_relu(const struct Matrix* matrix);
+
+struct Matrix* d_mse(struct Matrix *prediction, struct Matrix *output);
+
+
+void forward_prop(struct Network *network, struct Matrix* input);
+void calculate_d_loss(struct Network *network, struct Matrix* output);
+void back_prop(struct Network *network);
+void train_network(struct Network *network);
 
 #endif
