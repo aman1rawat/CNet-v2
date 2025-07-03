@@ -22,6 +22,10 @@ struct Matrix* relu(const struct Matrix* matrix){
 	return activated_matrix;
 }
 
+struct Matrix* linear(const struct Matrix* matrix) {
+    return copy_matrix(matrix);
+}
+
 struct Matrix* d_sigmoid(const struct Matrix* matrix){
 	struct Matrix* temp = copy_matrix(matrix);
 	struct Matrix* ones = copy_matrix(matrix);
@@ -32,7 +36,7 @@ struct Matrix* d_sigmoid(const struct Matrix* matrix){
 	return temp;
 }
 
-struct Martix* d_relu(const struct Matrix* matrix){
+struct Matrix* d_relu(const struct Matrix* matrix){
 	struct Matrix* temp = copy_matrix(matrix);
 	int n = matrix->row*matrix->col;
 	for(int i=0;i<n;i++){
@@ -40,4 +44,11 @@ struct Martix* d_relu(const struct Matrix* matrix){
 	}
 
 	return temp;
+}
+
+
+struct Matrix* d_linear(const struct Matrix* matrix) {
+    struct Matrix* temp = create_matrix(matrix->row, matrix->col);
+    fill_matrix(temp, 1.0f);
+    return temp;
 }

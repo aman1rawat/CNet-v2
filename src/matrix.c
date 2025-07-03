@@ -8,7 +8,7 @@
 struct Matrix* create_matrix(int row, int col){
 	if(row==0 || col==0){
 		printf("Invalid Dimensions (%d X %d) : matrix creation not possible\n", row, col);
-		return NULL;
+		exit(1);
 	}
 	struct Matrix* matrix = (struct Matrix*)malloc(sizeof(struct Matrix));
 	if(matrix==NULL){
@@ -28,7 +28,7 @@ struct Matrix* create_matrix(int row, int col){
 }
 
 struct Matrix* copy_matrix(const struct Matrix* matrix){
-	if(matrix==NULL) return NULL;
+	if(matrix==NULL) exit(1);
 
 	int row = matrix->row;
 	int col = matrix->col; 
@@ -46,7 +46,7 @@ struct Matrix* copy_matrix(const struct Matrix* matrix){
 
 
 void init_matrix(struct Matrix* matrix){
-	if(matrix==NULL) return;
+	if(matrix==NULL) exit(1);
 	srand(time(NULL));
 
 	float limit = sqrtf(6.0f/(matrix->row + matrix->col));
@@ -60,7 +60,7 @@ void init_matrix(struct Matrix* matrix){
 }
 
 void fill_matrix(struct Matrix* matrix, float value){
-	if(matrix==NULL) return;
+	if(matrix==NULL) exit(1);
 
 	int n = matrix->row * matrix->col;
 	for(int i=0;i<n;i++){
@@ -70,14 +70,14 @@ void fill_matrix(struct Matrix* matrix, float value){
 }
 
 void delete_matrix(struct Matrix* matrix){
-	if(matrix==NULL) return;
+	if(matrix==NULL) exit(1);
 	free(matrix->data);
 	free(matrix);
 	return;
 }
 
 void print_matrix(const struct Matrix* matrix){
-	if(matrix==NULL) return;
+	if(matrix==NULL) exit(1);
 
 	int row = matrix->row;
 	int col = matrix->col;
@@ -97,7 +97,7 @@ void print_matrix(const struct Matrix* matrix){
 }
 
 void add_matrix(struct Matrix* m1, const struct Matrix* m2){
-	if(m1==NULL || m2==NULL) return;
+	if(m1==NULL || m2==NULL) exit(1);
 
 	if(m1->row!=m2->row || m1->col!=m2->col){
 		printf("Dimension Mismatch - addition not possible\n");
@@ -111,7 +111,7 @@ void add_matrix(struct Matrix* m1, const struct Matrix* m2){
 }
 
 void subt_matrix(struct Matrix *m1, const struct Matrix *m2){
-	if(m1==NULL || m2==NULL) return;
+	if(m1==NULL || m2==NULL) exit(1);
 
 	if(m1->row!=m2->row || m1->col!=m2->col){
 		printf("Dimension Mismatch - subtraction not possible\n");
@@ -125,7 +125,7 @@ void subt_matrix(struct Matrix *m1, const struct Matrix *m2){
 }
 
 void pointwise_product(struct Matrix *m1, const struct Matrix *m2){
-	if(m1==NULL || m2==NULL) return;
+	if(m1==NULL || m2==NULL) exit(1);
 
 	if(m1->row!=m2->row || m1->col!=m2->col){
 		printf("Dimension Mismatch - pointwise multiplication not possible\n");
@@ -139,7 +139,7 @@ void pointwise_product(struct Matrix *m1, const struct Matrix *m2){
 }
 
 void scale_matrix(struct Matrix *matrix, float scale){
-	if(matrix==NULL) return;
+	if(matrix==NULL) exit(1);
 
 	int n = matrix->row*matrix->col;
 	for(int i=0;i<n;i++){
@@ -151,7 +151,7 @@ void scale_matrix(struct Matrix *matrix, float scale){
 struct Matrix* multiply_matrix(const struct Matrix *m1, const struct Matrix *m2){
 	if(m1->col!=m2->row){
 		printf("Dimension Mismatch: matrix multiplication not possible\n");
-		return NULL;
+		exit(1);
 	}
 
 	int row = m1->row;

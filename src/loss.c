@@ -1,8 +1,25 @@
 #include "../include/CNet.h"
 #include<stdio.h>
 #include<math.h>
+#include<stdlib.h>
 
-struct Matrix* d_mse(struct Matrix *prediction, struct Matrix *output){
+float mse(const struct Matrix* prediction, const struct Matrix* output){
+	if(prediction->row != output->row){
+		printf("Dimension Mismatch\n");
+		exit(1);
+	}
+
+	float error = 0.0f;
+	int n = prediction->row*prediction->col;
+	for(int i=0;i<n;i++){
+		float diff = prediction->data[i]-output->data[i];
+		error += powf(diff,2);
+	}
+	error /= n;
+	return error;
+}
+
+struct Matrix* d_mse(const struct Matrix *prediction, const struct Matrix *output){
 	if(prediction->row != output->row){
 		printf("Dimension Mismatch\n");
 		exit(1);
