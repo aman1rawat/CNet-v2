@@ -1,8 +1,8 @@
 CC = gcc
 FLAGS = -std=c17 -Iinclude -Wall
 
-all: main.o activation.o loss.o matrix.o nn.o
-	$(CC) $(FLAGS) main.o activation.o loss.o matrix.o nn.o -o main -lm
+all: main.o activation.o loss.o matrix.o nn.o loader.o
+	$(CC) $(FLAGS) main.o activation.o loss.o matrix.o nn.o loader.o -o main -lm
 
 main.o: example/main.c include/CNet.h
 	$(CC) $(FLAGS) -c example/main.c -o main.o
@@ -19,5 +19,8 @@ matrix.o: src/matrix.c include/CNet.h
 nn.o: src/nn.c include/CNet.h
 	$(CC) $(FLAGS) -c src/nn.c -o nn.o
 
+loader.o: src/mnist_loader.c include/CNet.h
+	$(CC) $(FLAGS) -c src/mnist_loader.c -o loader.o
+
 clean:
-	rm -f main main.o activation.o loss.o matrix.o nn.o
+	rm -f main main.o activation.o loss.o matrix.o nn.o input_data.bin output_data.bin

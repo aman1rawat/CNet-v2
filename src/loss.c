@@ -19,6 +19,17 @@ float mse(const struct Matrix* prediction, const struct Matrix* output){
 	return error;
 }
 
+float cross_entropy(const struct Matrix* prediction, const struct Matrix* output){
+	float loss = 0.0f;
+	int n = prediction->row*prediction->col;
+	for(int i=0;i<n;i++){
+		loss += output->data[i]*logf(prediction->data[i] + 1e-7f);
+	}
+	loss *= -1.0f;
+
+	return loss;
+}
+
 struct Matrix* d_mse(const struct Matrix *prediction, const struct Matrix *output){
 	if(prediction->row != output->row){
 		printf("Dimension Mismatch\n");
@@ -33,3 +44,25 @@ struct Matrix* d_mse(const struct Matrix *prediction, const struct Matrix *outpu
 
 	return d_loss;
 }
+
+int check(const struct Matrix* prediction, const struct Matrix* output){
+	int pred_i = 0, out_i = 0; 
+	float max_pred = prediction->data[0];
+	float max_out = output->data[0];
+	int n = prediction->row * prediction->col;
+
+	for(int i=1;i<n;i++){
+		if(prediction->data[i]>max_pred){
+		 	max_pred = prediction->data[i];
+		 	pred_i = i;	
+		}
+		if(output->data[i]>max_out){
+			max_out = output->data[i];
+			out_i = i;
+		}
+	}
+
+	if(pred_i==out_i) return 1;
+	else return 0;
+}
+

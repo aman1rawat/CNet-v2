@@ -2,24 +2,49 @@
 #include<stdlib.h>
 #include<stdio.h>
 
-void train_network(struct Network* network, struct Matrix** inputs, struct Matrix** outputs){
+void train_network(struct Network* network, struct DataLoader* loader){
 	int epoch=1;
 	int total_epochs = network->config->total_epochs;
 	int total_samples = network->config->total_samples;
-	float loss = 0.0f;
+
 	while(epoch<=total_epochs){
-		printf("Epoch : %d\n", epoch);
+		float loss = 0.0f;
+		int correct = 0;
+		printf("\nEpoch : %d\n", epoch);
 		for(int i=0;i<total_samples;i++){
-			forward_prop(network, inputs[i]);
-			calculate_loss(network, outputs[i]);
+			load_next_sample(loader);
+			// printf("Sample loaded\n");
+
+			forward_prop(network, loader->input);
+			// printf("Forward prop done\n");
+			calculate_loss(network, loader->output);
+			// printf("Loss calculated\n");
 			loss += network->loss;
-			back_prop(network);
+			if(i%1000 == 0){
+				printf("Sample number : %d\n", i);	
+				printf("Running Avg. Loss : %.4f\n", loss/(i+1));
+			} 
+			back_prop(network, loader->input);
+			// printf("Backward prop done\n");
+			
+			if(network->config->loss_function == CROSS_ENTROPY){
+				if(check(network->last_layer->activated_sum, loader->output)){
+					correct++;
+				}
+			}
+			
 			clean_network(network);
 		}
+
+		reset_loader(loader);
+		float accuracy = 100.0f*correct/(float)total_samples;
 		loss /= total_samples;
-		printf("Loss : %.4f\n\n", loss);
+		printf("------------Accuracy : %.4f------------\n\n", accuracy);
+		printf("------------Average Loss : %.4f------------\n\n", loss);
 		epoch++;
 	}
+
+	return;
 }
 
 void forward_prop(struct Network *network, const struct Matrix *input){
@@ -46,6 +71,9 @@ void forward_prop(struct Network *network, const struct Matrix *input){
 			case LINEAR:
 				curr_layer->activated_sum = linear(curr_layer->weighted_sum);
 				break;
+			case SOFTMAX:
+				curr_layer->activated_sum = softmax(curr_layer->weighted_sum);
+				break;
 			default:
 				printf("Invalid Activation\n");
 				exit(1);
@@ -62,33 +90,48 @@ void calculate_loss(struct Network *network, const struct Matrix* output){
 			network->loss_derivative = d_mse(network->last_layer->activated_sum, output);
 			network->loss = mse(network->last_layer->activated_sum, output);
 			break;
+		case CROSS_ENTROPY:
+			network->loss_derivative = NULL;
+			network->last_layer->error = d_softmax(network->last_layer->activated_sum, output);
+			network->loss = cross_entropy(network->last_layer->activated_sum, output);
+			break;
 	}
 	return;
 }
  
-void back_prop(struct Network *network){
+void back_prop(struct Network *network, const struct Matrix* input){
+	// printf("Back propagation started\n");
 	struct Layer* curr_layer = network->last_layer;
 	while(curr_layer!=NULL){
 		switch(curr_layer->activation){
 			case SIGMOID:
+				// printf("sigmoid\n");
 				curr_layer->error = d_sigmoid(curr_layer->weighted_sum);
 				break;
 			case RELU:
+				// printf("relu\n");
 				curr_layer->error = d_relu(curr_layer->weighted_sum);
 				break;
 			case LINEAR:
+				// printf("linear\n");
 				curr_layer->error = d_linear(curr_layer->weighted_sum);
+				break;
+			case SOFTMAX:
+				// printf("softmax\n");
 				break;
 			default:
 				printf("Invalid Activation\n");
 				exit(1);
 				break;
 		}
+		// printf("Switch case ended\n");
 
-		if(curr_layer==network->last_layer){
+		if(curr_layer==network->last_layer && curr_layer->activation != SOFTMAX){
+			// printf("if condition\n");
 			pointwise_product(curr_layer->error, network->loss_derivative);
 		}
-		else{
+		else if(curr_layer != network->last_layer){
+			// printf("else case\n");
 			struct Matrix* propagated_error;
 			struct Matrix* transposed_weights = transpose_matrix(curr_layer->next_layer->weights);
 			propagated_error = multiply_matrix(transposed_weights, curr_layer->next_layer->error);
@@ -97,7 +140,16 @@ void back_prop(struct Network *network){
 			delete_matrix(propagated_error);
 		}
 
-		struct Matrix *transposed_activated_sum = transpose_matrix(curr_layer->prev_layer->activated_sum);
+		// printf("Error calculated\n");
+
+		struct Matrix *transposed_activated_sum;
+		if(curr_layer==network->first_layer){
+			transposed_activated_sum = transpose_matrix(input);
+		}
+		else{
+			transposed_activated_sum = transpose_matrix(curr_layer->prev_layer->activated_sum);
+		}
+		
 		struct Matrix *weight_gradient = multiply_matrix(curr_layer->error, transposed_activated_sum);
 		scale_matrix(weight_gradient, network->config->lr);
 
@@ -111,28 +163,50 @@ void back_prop(struct Network *network){
 		delete_matrix(weight_gradient);
 		delete_matrix(bias_gradient);
 
-		curr_layer = curr_layer->next_layer;
+		curr_layer = curr_layer->prev_layer;
+		// printf("Moved back to previous layer\n\n");
 	}
+	// printf("While loop ended\n");
+	return;
 }
 
 void clean_network(struct Network* network){
+	// printf("Starting cleanup\n");
+	if(network==NULL){
+		// printf("No network to clean\n");
+		exit(1);	
+	} 
 	struct Layer* curr_layer = network->first_layer;
+	if(curr_layer==NULL){
+		// printf("No layer to clean\n");
+		exit(1);
+	}
+
 	while(curr_layer!=NULL){
 		if(curr_layer->weighted_sum!=NULL){
+			// printf("Deleting weighted sum\n");
 			delete_matrix(curr_layer->weighted_sum);
 			curr_layer->weighted_sum =NULL;
 		}
 		if(curr_layer->activated_sum!=NULL){
+			// printf("Deleting activated sum\n");
 			delete_matrix(curr_layer->activated_sum);
 			curr_layer->activated_sum =NULL;
 		}
 		if(curr_layer->error!=NULL){
+			// printf("Deleting error\n");
 			delete_matrix(curr_layer->error);
 			curr_layer->error =NULL;
 		}
+		// printf("\n\n");
 		curr_layer = curr_layer->next_layer;
 	}
-	delete_matrix(network->loss_derivative);
+	if(network->loss_derivative != NULL){
+		// printf("Deleting loss derivative\n");
+		delete_matrix(network->loss_derivative);
+		network->loss_derivative = NULL;
+	}
+	// printf("Cleanup finished\n");
 	return;
 }
 
@@ -143,6 +217,7 @@ struct Network* create_network(int input_size){
 	network->input_size = input_size;
 	network->config = (struct TrainingConfig*)malloc(sizeof(struct TrainingConfig));
 	network->loss = 0.0f;
+	network->loss_derivative = NULL;
 
 	return network;
 }

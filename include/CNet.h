@@ -1,8 +1,10 @@
 #ifndef CNET_H
 #define CNET_H
 
-enum Activation{SIGMOID, RELU, LINEAR};
-enum LossFunction{MSE};
+#include<stdint.h>
+
+enum Activation{SIGMOID, RELU, LINEAR, SOFTMAX};
+enum LossFunction{MSE, CROSS_ENTROPY};
 
 struct Matrix{
 	int row, col;
@@ -37,6 +39,18 @@ struct Network{
 	struct TrainingConfig* config;
 };
 
+struct DataLoader{
+	int samples;
+
+	uint8_t *is_used;
+	
+	char *input_file;
+	char *output_file;
+	
+	struct Matrix *input;
+	struct Matrix *output;
+};
+
 struct Matrix* create_matrix(int row, int col);
 struct Matrix* copy_matrix(const struct Matrix* matrix);
 void init_matrix(struct Matrix* matrix);
@@ -60,18 +74,30 @@ void remove_layer(struct Network *network);
 struct Matrix* sigmoid(const struct Matrix* matrix);
 struct Matrix* relu(const struct Matrix* matrix);
 struct Matrix* linear(const struct Matrix* matrix);
+
+struct Matrix* softmax(const struct Matrix* matrix);
+
 struct Matrix* d_sigmoid(const struct Matrix* matrix);
 struct Matrix* d_relu(const struct Matrix* matrix);
 struct Matrix* d_linear(const struct Matrix* matrix);
+struct Matrix* d_softmax(const struct Matrix *prediction, const struct Matrix *output);
+int check(const struct Matrix* prediction, const struct Matrix* output);
 
+float cross_entropy(const struct Matrix* prediction, const struct Matrix* output);
 float mse(const struct Matrix* prediction, const struct Matrix* output);
 struct Matrix* d_mse(const struct Matrix *prediction,const struct Matrix *output);
 
+
 void forward_prop(struct Network *network, const struct Matrix* input);
 void calculate_loss(struct Network *network, const struct Matrix* output);
-void back_prop(struct Network *network);
+void back_prop(struct Network *network, const struct Matrix* matrix);
 void clean_network(struct Network *network);
+void train_network(struct Network* network, struct DataLoader* loader);
 
-void train_network(struct Network* network, struct Matrix** inputs, struct Matrix** outputs);
+struct DataLoader* init_data_loader(int samples);
+void delete_loader(struct DataLoader* loader);
+void read_csv(struct DataLoader* loader, const char* file);
+void reset_loader(struct DataLoader* loader);
+void load_next_sample(struct DataLoader *loader);
 
 #endif

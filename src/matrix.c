@@ -40,7 +40,7 @@ struct Matrix* copy_matrix(const struct Matrix* matrix){
 
 	if(new_matrix->data==NULL) return NULL;
 	
-	memcpy(new_matrix->data, matrix->data, row*col*sizeof(int));
+	memcpy(new_matrix->data, matrix->data, row*col*sizeof(float));
 	return new_matrix;
 }
 
@@ -87,8 +87,9 @@ void print_matrix(const struct Matrix* matrix){
 	for(int i=0;i<row;i++){
 		for(int j=0;j<col;j++){
 			float n = matrix->data[i*col+j];
-			if(n<0) printf("%.2f ", n);
-			else printf(" %.2f ", n);
+			if(n<10) printf("%.2f   ", n);
+			else if(n<100) printf("%.2f  ", n);
+			else printf("%.2f ", n);
 		}
 		printf("\n");
 	}
